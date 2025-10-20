@@ -2,11 +2,9 @@
 
 This submission covers the first project milestone: training and evaluating a **Linear Regression** model for predicting the **State of Health (SOH)** of a battery pack using the **PulseBat dataset**.
 
----
-
 ## 1. Instructions on How to Set Up and Run the Code
 
-### 1.1 Prerequisites
+### 1.1 Dependencies
 
 Ensure you have **Python installed** (version 3.8+ is recommended). The following libraries are required:
 
@@ -20,41 +18,35 @@ Ensure you have **Python installed** (version 3.8+ is recommended). The followin
 
 You can install all necessary dependencies at once using the following command: `pip install pandas numpy scikit-learn openpyxl tabulate`
 
-## 1.2 File Structure
+### 1.2 File Structure
 
-Place the following files in the same directory:
+The following files must be in the same directory:
 
 - `linear_regression_soh_prediction.py` (The Python script)  
 - `PulseBat Dataset.xlsx` (The dataset file)  
 - `README.md` (This document)  
 
----
+### 1.3 Running the Code
 
-## 1.3 Running the Code
+Execute the Python script from the terminal or command prompt: `python linear_regression_soh_prediction.py`
 
-Execute the Python script from your terminal or command prompt: `python linear_regression_soh_prediction.py`
-
-## 1.4 Output
+### 1.4 Output
 
 The script will output the following sections, demonstrating the completion of the task:
 
-- Status messages confirming successful data loading.
-- Evaluation metrics (\( R^2 \), MSE, MAE) for the Unsorted model.
-- Evaluation metrics (\( R^2 \), MSE, MAE) for the Sorted model.
-- A comparison table of the preprocessing techniques.
-- A demonstration of the threshold-based classification.
-
----
+- Status messages confirming successful data loading
+- Evaluation metrics (\( R^2 \), MSE, MAE) for the Unsorted model
+- Evaluation metrics (\( R^2 \), MSE, MAE) for the Sorted model
+- A comparison table of the preprocessing techniques
+- A demonstration of the threshold-based classification
 
 ## 2. Technical Implementation Details
 
 ### 2.1 Dataset Handling and Preprocessing
 
-- **File Handling**: The code uses robust exception handling to read the `PulseBat Dataset.xlsx` file. It first attempts to use `pd.read_excel` (requiring `openpyxl`) and falls back to `pd.read_csv`, ensuring compatibility with the file format used in the project.
-- **Data Cleaning**: Column headers are cleaned using `.str.strip()` to remove unseen whitespace, which prevents `KeyError` exceptions. Rows with missing data (`NaN`) in the SOH or cell voltage columns are removed.
-- **Aggregation (U1–U21 to Pack SOH)**: The Linear Regression model inherently performs the aggregation. It learns optimal coefficients for all 21 cell voltages (\( U1 \dots U21 \)) to combine them into a single, estimated Pack SOH value.
-
----
+- **File Handling**: The code uses robust exception handling to read the `PulseBat Dataset.xlsx` file. It first attempts to use `pd.read_excel` (requiring `openpyxl`) and falls back to `pd.read_csv`, ensuring compatibility with the file format used in the project
+- **Data Cleaning**: Column headers are cleaned using `.str.strip()` to remove unseen whitespace, which prevents `KeyError` exceptions. Rows with missing data (`NaN`) in the SOH or cell voltage columns are removed
+- **Aggregation (U1–U21 to Pack SOH)**: The Linear Regression model inherently performs the aggregation. It learns optimal coefficients for all 21 cell voltages (\( U1 \dots U21 \)) to combine them into a single, estimated Pack SOH value
 
 ### 2.2 Preprocessing Technique Comparison
 
@@ -62,21 +54,18 @@ Two distinct feature sets were created and compared to assess the impact of prep
 
 | Model              | Feature Set             | Implementation                                                                 | Comparison Result                                                                 |
 |--------------------|-------------------------|----------------------------------------------------------------------------------|------------------------------------------------------------------------------------|
-| Model 1 (Baseline) | Unsorted Cell Voltages  | Uses the physical voltage readings in their original order (\( U1, U2, \dots, U21 \)) | Provides context and location-specific data to the model                          |
-| Model 2 (Comparison)| Sorted Cell Voltages   | For every data row, the 21 voltages are sorted numerically, creating new features (\( U_{\text{min}}, \dots, U_{\text{max}} \)) | Demonstrated Marginal Superiority (\( R^2 = 0.6588 \) vs \( 0.6561 \)), suggesting that normalizing cell variation slightly improves prediction accuracy |
+| Model 1 (Baseline) | Unsorted Cell Voltages  | Uses the physical voltage readings in their original order (\( U1, U2, ..., U21 \)) | Provides context and location-specific data to the model                          |
+| Model 2 (Comparison)| Sorted Cell Voltages   | For every data row, the 21 voltages are sorted numerically, creating new features \[(U_min, ..., U_max)] | Demonstrated Marginal Superiority (\( R^2 = 0.6588 \) vs \( 0.6561 \)), suggesting that normalizing cell variation slightly improves prediction accuracy |
 
----
 
 ### 2.3 Linear Regression Model & Evaluation
 
-- **Model**: `sklearn.linear_model.LinearRegression` was used.
-- **Data Split**: 80% Training / 20% Testing (`random_state=42`).
+- **Model**: `sklearn.linear_model.LinearRegression` was used
+- **Data Split**: 80% Training / 20% Testing (`random_state=42`)
 - **Metrics**: The model's predictive performance was evaluated using the required metrics:
   - R² (goodness of fit)
   - MSE (Mean Squared Error)
   - MAE (Mean Absolute Error)
-
----
 
 ### 2.4 Threshold-based Classification
 
@@ -84,14 +73,6 @@ The logic for determining the battery's health status was implemented in the `cl
 
 **Rule**: The prediction from the Linear Regression model is used with the variable threshold:
 
-- If SOH \( \ge 0.6 \): Status is **Healthy**
+- If SOH \( >= 0.6 \): Status is **Healthy**
 - If SOH \( < 0.6 \): Status is **Unhealthy**
 
-## 3. Final Submission Deliverable Checklist
-
-This ZIP folder submission contains:
-
-- [ ] `linear_regression_soh_prediction.py` (Source Code)  
-- [ ] `README.md` (This file) 
-- [ ] `PulseBat Dataset.xlsx` (Dataset)  
-- [ ] `SOFE3770U - Group 12 - Task 1 - Training LR Model Results.pdf` (Written Explanatory Document with Output and Results)
