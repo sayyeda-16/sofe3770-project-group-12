@@ -3,6 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import numpy as np
+import joblib
 
 # --- 1. Dataset Handling ---
 file_name = 'PulseBat Dataset.xlsx' 
@@ -88,6 +89,11 @@ results_unsorted, y_test_unsorted, y_pred_unsorted = train_and_evaluate_model(
 results_sorted, y_test_sorted, y_pred_sorted = train_and_evaluate_model(
     X_sorted, y, "Model 2: Sorted Cell Voltages (Preprocessed)"
 )
+
+# save the trained models to be used by the chatbot
+joblib.dump(results_unsorted['Model'], "models/model_unsorted.pkl")
+joblib.dump(results_sorted['Model'], "models/model_sorted.pkl")
+print("Models have been saved to models folder")
 
 # Comparison of Training Preprocessing Techniques
 comparison_df = pd.DataFrame([results_unsorted, results_sorted])
