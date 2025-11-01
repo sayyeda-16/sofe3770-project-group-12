@@ -2,10 +2,8 @@ import os
 import pandas as pd
 import numpy as np
 import google.generativeai as genai
-from sklearn.linear_model import LinearRegression
 from dotenv import load_dotenv
 import traceback
-import textwrap
 import joblib
 
 # load api key
