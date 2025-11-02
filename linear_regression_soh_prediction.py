@@ -4,6 +4,8 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import numpy as np
 import joblib
+import os # Import os for directory management
+from tabulate import tabulate # Import tabulate to ensure the comparison table prints well
 
 # --- 1. Dataset Handling ---
 file_name = 'PulseBat Dataset.xlsx' 
@@ -14,8 +16,7 @@ try:
     df = pd.read_excel(file_name, engine='openpyxl')
     
 except Exception as e:
-    # 2. Fallback: If Excel reading fails (due to format or engine issue), try reading as CSV.
-    # This addresses the likelihood that the content is CSV-formatted despite the .xlsx name.
+    # 2. Fallback: If Excel reading fails, try reading as CSV.
     print(f"Excel read failed ({e}). Falling back to CSV reading.")
     try:
         df = pd.read_csv(file_name)
@@ -29,10 +30,15 @@ df.columns = df.columns.str.strip()
 CELL_FEATURES = [f'U{i}' for i in range(1, 22)]
 TARGET = 'SOH'
 
-# Clean data by dropping rows with NaN values in relevant columns
+# Clean data by dropping rows with NaN values in relevant columns (Project Requirement)
+initial_rows = len(df)
 df_clean = df.dropna(subset=CELL_FEATURES + [TARGET]).copy()
-print(f"\nSuccessfully loaded and cleaned {len(df_clean)} rows.")
-print("Proceeding to model training...")
+removed_rows = initial_rows - len(df_clean)
+
+print(f"\nSuccessfully loaded {initial_rows} rows.")
+if removed_rows > 0:
+    print(f"Removed {removed_rows} rows with missing data in required columns.")
+print(f"Proceeding with {len(df_clean)} clean rows for model training...")
 
 # --- Preprocessing and Aggregation ---
 
@@ -41,7 +47,6 @@ X_unsorted = df_clean[CELL_FEATURES]
 # The Linear Regression model performs the required aggregation (U1-U21 to Pack SOH).
 
 # B. Feature Set 2: Sorted Cell Voltages (Comparison Preprocessing)
-# Implements the 'sorting technique' preprocessing
 X_sorted = np.sort(df_clean[CELL_FEATURES].values, axis=1)
 X_sorted = pd.DataFrame(X_sorted, 
                         columns=[f'Sorted_U{i}' for i in range(1, 22)], 
@@ -53,11 +58,15 @@ y = df_clean[TARGET]
 # --- 2. Linear Regression Model Training & Evaluation ---
 
 def train_and_evaluate_model(X, y, model_name):
-    """Splits data, trains Linear Regression, and evaluates performance."""
+    """
+    Splits data, trains Linear Regression, and evaluates performance.
+    
+    This function returns the trained model object.
+    """
 
     print(f"\n--- Training and Evaluation: {model_name} ---")
 
-    # Split data (80% Train, 20% Test)
+    # Split data (80% Train, 20% Test, fixed random state=42 - Project Requirement)
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42
     )
@@ -69,7 +78,7 @@ def train_and_evaluate_model(X, y, model_name):
     # Predict on the test set
     y_pred = model.predict(X_test)
 
-    # Evaluate Performance Metrics
+    # Evaluate Performance Metrics (R², MSE, MAE - Project Requirement)
     r2 = r2_score(y_test, y_pred)
     mse = mean_squared_error(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
@@ -80,28 +89,35 @@ def train_and_evaluate_model(X, y, model_name):
     print(f"Mean Squared Error (MSE): {mse:.4e}")
     print(f"Mean Absolute Error (MAE): {mae:.4e}")
 
-    return results, y_test.reset_index(drop=True), y_pred
+    # Return the trained model object as well as the results
+    return results, model, y_test.reset_index(drop=True), y_pred
 
 # Train and collect results for both models
-results_unsorted, y_test_unsorted, y_pred_unsorted = train_and_evaluate_model(
+results_unsorted, model_unsorted_obj, y_test_unsorted, y_pred_unsorted = train_and_evaluate_model(
     X_unsorted, y, "Model 1: Unsorted Cell Voltages (Baseline)"
 )
-results_sorted, y_test_sorted, y_pred_sorted = train_and_evaluate_model(
+results_sorted, model_sorted_obj, y_test_sorted, y_pred_sorted = train_and_evaluate_model(
     X_sorted, y, "Model 2: Sorted Cell Voltages (Preprocessed)"
 )
 
-# save the trained models to be used by the chatbot
-joblib.dump(results_unsorted['Model'], "models/model_unsorted.pkl")
-joblib.dump(results_sorted['Model'], "models/model_sorted.pkl")
-print("Models have been saved to models folder")
+# --- 3. Save Models ---
+MODEL_DIR = "models"
+if not os.path.exists(MODEL_DIR):
+    os.makedirs(MODEL_DIR)
+
+# Save the actual model objects (model_unsorted_obj, model_sorted_obj)
+joblib.dump(model_unsorted_obj, f"{MODEL_DIR}/model_unsorted.pkl")
+joblib.dump(model_sorted_obj, f"{MODEL_DIR}/model_sorted.pkl")
+print(f"\nModels have been saved to the '{MODEL_DIR}' folder.")
 
 # Comparison of Training Preprocessing Techniques
 comparison_df = pd.DataFrame([results_unsorted, results_sorted])
 
 print("\n--- Preprocessing Technique Comparison ---")
-print(comparison_df.to_markdown(index=False, floatfmt=".4f"))
+# Use the imported tabulate for better terminal printing, though to_markdown is fine too
+print(tabulate(comparison_df, headers='keys', tablefmt='pipe', showindex=False, floatfmt=".4f"))
 
-# --- 3. Threshold-Based Classification ---
+# --- 4. Threshold-Based Classification ---
 
 def classify_battery_health(soh_prediction, threshold=0.6):
     """Implements the 0.6 threshold rule for battery classification."""
@@ -111,7 +127,7 @@ def classify_battery_health(soh_prediction, threshold=0.6):
         return "Healthy (SOH >= 0.6)"
 
 # Example of classification using the predictions from Model 1
-classification_threshold = 0.6 # This can be a variable entered by the user
+classification_threshold = 0.6 
 sample_df = pd.DataFrame({
     'Actual SOH': y_test_unsorted.head(),
     'Predicted SOH': y_pred_unsorted[:5]
@@ -119,4 +135,4 @@ sample_df = pd.DataFrame({
 sample_df['Status'] = sample_df['Predicted SOH'].apply(lambda x: classify_battery_health(x, classification_threshold))
 
 print(f"\n--- Classification Example using {classification_threshold} Threshold (Model 1) ---")
-print(sample_df.to_markdown(index=False, floatfmt=".4f"))
+print(tabulate(sample_df, headers='keys', tablefmt='pipe', showindex=False, floatfmt=".4f"))
