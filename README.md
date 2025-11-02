@@ -2,6 +2,13 @@
 
 This submission covers the first project milestone: training and evaluating a **Linear Regression** model for predicting the **State of Health (SOH)** of a battery pack using the **PulseBat dataset**.
 
+## \**These are the following steps to run the updated code, which includes the Gemini chatbot that answers questions about the dataset or general questions about batteries.**
+1) If you don't have the project, clone the repo; otherwise, pull the latest changes using `git pull origin main`
+2) Install dependencies listed in the requirements.txt file using `pip install -r requirements.txt`
+3) Search gemini api key, get an api key, create a .env file, and put `GEMINI_API_KEY="yourapikeyhere"` (make sure not to commit the env file to git)
+4) Run the model: `python linear_regression_soh_prediction.py`
+5) Run the Streamlit app to chat with the Gemini model: `streamlit run app.py`
+
 ## 1. Instructions on How to Set Up and Run the Code
 
 ### 1.1 Dependencies
