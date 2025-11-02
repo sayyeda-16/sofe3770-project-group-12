@@ -1,4 +1,4 @@
-# SOFE3370 Project Documentation
+# SOFE3370 Project Repository Guide
 
 This repository contains the code and documentation for the SOFE3370 project, structured into two key tasks: **Task 1: Battery State of Health (SOH) Prediction** using Linear Regression, and **Task 2: Dataset Exploration** using the Gemini API and Streamlit.
 
