@@ -11,7 +11,7 @@ This section details the steps required to set up the environment for both tasks
 ### 1. Project Initialization
 
 1.  **Clone the Repo or Pull Changes:**
-    * If you don't have the project: `git clone <your_repo_link>`
+    * If you don't have the project: `git clone https://github.com/sayyeda-16/sofe3770-project-group-12`
     * Otherwise, pull the latest changes: `git pull origin main`
 
 2.  **Install Dependencies:**
@@ -42,7 +42,7 @@ This section details the steps required to set up the environment for both tasks
     * **Action:** In the project's root directory, create a file named **`.env`**.
     * **Action:** Open the file and set the environment variable, replacing `your_actual_api_key_here` with the key you just copied:
         ```
-        GEMINI_API_KEY="your_actual_api_key_here"
+        GEMINI_API_KEY=your_actual_api_key_here
         ```
 
 3.  **Secure Your Key (CRITICAL):**
