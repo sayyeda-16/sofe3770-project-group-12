@@ -6,3 +6,5 @@ scikit-learn
 python-dotenv
 langchain
 openpyxl
+tabulate
+matplotlib

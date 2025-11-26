@@ -6,6 +6,9 @@ import numpy as np
 import joblib
 import os # Import os for directory management
 from tabulate import tabulate # Import tabulate to ensure the comparison table prints well
+import matplotlib.pyplot as plt
+import numpy as np             
+
 
 # --- 1. Dataset Handling ---
 file_name = 'PulseBat Dataset.xlsx' 
@@ -136,3 +139,39 @@ sample_df['Status'] = sample_df['Predicted SOH'].apply(lambda x: classify_batter
 
 print(f"\n--- Classification Example using {classification_threshold} Threshold (Model 1) ---")
 print(tabulate(sample_df, headers='keys', tablefmt='pipe', showindex=False, floatfmt=".4f"))
+
+# --- 5. Generate Predicted vs. Actual SOH Plot ---
+
+# We use the results from Model 2 (Sorted Cell Voltages) as it was the selected final model.
+# These variables were returned by the train_and_evaluate_model function:
+actual_soh = y_test_sorted
+predicted_soh = y_pred_sorted
+
+# Create the plot
+plt.figure(figsize=(8, 6))
+
+# 1. Scatter Plot: Actual SOH vs. Predicted SOH
+plt.scatter(actual_soh, predicted_soh, alpha=0.6, label='Predicted SOH (Test Data)', color='darkblue')
+
+# 2. Ideal Line (y=x): Represents perfect prediction
+# We use the min/max range of the actual SOH values for the line
+min_val = min(actual_soh.min(), predicted_soh.min())
+max_val = max(actual_soh.max(), predicted_soh.max())
+ideal_line = np.linspace(min_val, max_val, 100)
+plt.plot(ideal_line, ideal_line, color='red', linestyle='--', label='Ideal Prediction (y=x)')
+
+# Set labels and title
+plt.title('Predicted vs. Actual State of Health (SOH) - Linear Regression Model 2')
+plt.xlabel('Actual State of Health (SOH)')
+plt.ylabel('Predicted State of Health (SOH)')
+plt.legend()
+plt.grid(True, linestyle=':', alpha=0.6)
+plt.tight_layout()
+
+# Save the figure to a file for the report
+plt.savefig('Predicted_vs_Actual_SOH.png', dpi=300) 
+
+# Display the plot
+plt.show()
+
+print("\nPlot saved as 'Predicted_vs_Actual_SOH.png'")
