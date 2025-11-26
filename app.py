@@ -53,6 +53,24 @@ You have access to the following Python functions:
   classify_battery_health(predict_soh(model_unsorted, [V1, V2, V3, V4, V5, V6, V7, V8, V9, V10, V11, V12, V13, V14, V15, V16, V17, V18, V19, V20, V21])"""
 
 
+# SIDEBAR
+st.sidebar.title("🔋 Battery Analytics")
+st.sidebar.markdown("---")
+st.sidebar.subheader("Dataset Info")
+st.sidebar.write(f"**Samples:** {len(df)}")
+st.sidebar.write(f"**Features:** {len(df.columns)}")
+
+if 'SOH' in df.columns:
+    st.sidebar.write(f"**Avg SOH:** {df['SOH'].mean():.2f}")
+    st.sidebar.write(f"**SOH Range:** {df['SOH'].min():.2f} - {df['SOH'].max():.2f}")
+
+st.sidebar.markdown("---")
+st.sidebar.subheader("Quick Actions")
+if st.sidebar.button("🔄 Refresh Data"):
+    st.cache_data.clear()
+    st.rerun()
+
+
 # 3. Streamlit Application and Execution Logic
 
 st.set_page_config(page_title="Battery SOH Chatbot", layout="wide")
