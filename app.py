@@ -58,6 +58,11 @@ You have access to the following Python functions:
 st.set_page_config(page_title="Battery SOH Chatbot", layout="wide")
 st.title("Battery SOH Chatbot: Dataset Exploration and SOH Prediction Assistant")
 
+if st.button("🧹 Clear Chat"):
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Hello! I am the Battery SOH Assistant. How can I help today?"}
+    ]
+    st.rerun()
 # Display Chat History
 for chat in st.session_state.messages:
     with st.chat_message(chat["role"]):
