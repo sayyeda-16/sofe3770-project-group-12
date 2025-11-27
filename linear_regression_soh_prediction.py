@@ -140,6 +140,17 @@ sample_df['Status'] = sample_df['Predicted SOH'].apply(lambda x: classify_batter
 print(f"\n--- Classification Example using {classification_threshold} Threshold (Model 1) ---")
 print(tabulate(sample_df, headers='keys', tablefmt='pipe', showindex=False, floatfmt=".4f"))
 
+# Model 2 classification example
+sample_df2 = pd.DataFrame({
+    'Actual SOH': y_test_sorted.head(),
+    'Predicted SOH': y_pred_sorted[:5]
+})
+sample_df2['Status'] = sample_df2['Predicted SOH'].apply(lambda x: classify_battery_health(x, classification_threshold))
+
+print(f"\n--- Classification Example using {classification_threshold} Threshold (Model 2) ---")
+print(tabulate(sample_df2, headers='keys', tablefmt='pipe', showindex=False, floatfmt=".4f"))
+
+
 # --- 5. Generate Predicted vs. Actual SOH Plot ---
 
 # We use the results from Model 2 (Sorted Cell Voltages) as it was the selected final model.
